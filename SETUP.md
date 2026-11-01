@@ -1,32 +1,65 @@
 # CarboTrack — Institutional Emissions Intelligence
-CarboTrack is a responsive institutional greenhouse-gas inventory platform for colleges, universities and campuses. The public estimator is an educational, anonymous experience; it is deliberately separate from the official institutional inventory.
 
-## Deploy
-Vercel project type: Other / static site. Framework preset: Other. Build command: leave blank. Output directory: `.`. Root directory: repository root. No Node build step is required. The public Supabase URL and publishable key are configured in `js/config.js`. Never expose a Supabase secret or service-role key in browser code.
+CarboTrack is a responsive institutional greenhouse-gas inventory platform for colleges, universities and campuses. The public estimator is an educational, anonymous experience; it is separate from the official institutional inventory.
 
-## Supabase setup (run in this order)
-1. Run `supabase/institutional-schema.sql` in the Supabase SQL Editor.
-2. Run `supabase/departmental-access.sql` in the SQL Editor.
-3. For development testing only, email confirmation can be disabled in Authentication → Sign In / Providers. Re-enable it and configure custom SMTP before production.
-4. Register an account at `auth.html`. Create an institution workspace at `organization.html`.
-5. Add campus buildings and facilities in `facilities.html`.
-6. Register department staff at `team.html`. Staff must first create a CarboTrack account; an administrator then assigns their email to a department.
-7. Enter daily or monthly activity at `data-entry.html`. Review totals in `dashboard.html` and export the activity register from `reports.html`.
+## Deploy the website
+Vercel project type: Other / static site. Framework preset: Other. Build command: leave blank. Output directory: `. ` (repository root; use `.` in Vercel). The public Supabase URL and publishable key are configured in `js/config.js`. Never expose a Supabase secret or service-role key in browser code.
 
-## Department access
-- Admin: full institution access and staff assignment.
-- Institution data manager: broad activity data entry and review.
-- Energy, fuel, transport, waste and procurement managers: submit activity records only for their assigned department.
-- Viewer: read-only access.
+## Supabase database setup
+Run these SQL files in the Supabase SQL Editor in this exact order:
+1. `supabase/institutional-schema.sql`
+2. `supabase/departmental-access.sql`
+3. `supabase/staff-access.sql`
 
-The departmental SQL migration adds a department field and scoped insert/update policies. Run it after the institutional schema. It is designed to be rerun safely.
+The third migration creates the staff-ID registry, restricts the member roster to the administrator and applies department-specific RLS to activity records. Staff can read records for their own department and update only records they personally entered. The administrator can read and manage the whole institution.
+
+## Deploy the staff authentication Edge Functions
+The staff-ID login requires two Supabase Edge Functions. They are source-controlled in this repository but are **not deployed by Vercel**.
+
+Install the Supabase CLI, open a terminal in the repository root, sign in and link the project:
+
+```bash
+supabase login
+supabase link --project-ref gltqeuipmyzkwfefqifu
+supabase functions deploy staff-login --no-verify-jwt
+supabase functions deploy staff-admin
+```
+
+The `supabase/config.toml` file configures `staff-login` for unauthenticated invocation (it performs its own staff-ID/PIN verification) and requires a valid JWT for `staff-admin`. Hosted Supabase Edge Functions provide `SUPABASE_URL`, `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` as environment variables. If your project does not expose them, set them as Edge Function secrets in Supabase Dashboard → Edge Functions → Secrets. **Never put the service-role key in GitHub or frontend files.**
+
+## First-time administrator setup
+1. Open `auth.html`.
+2. Choose **Administrator** → **Create the first administrator account**.
+3. Verify the administrator email if Supabase email confirmation is enabled, then sign in.
+4. Create the institution workspace at `organization.html`. The account that creates the workspace becomes its administrator.
+5. Add campus buildings in `facilities.html`.
+
+## Create individual department logins
+1. Sign in as the institution administrator.
+2. Open **Team / Staff access**.
+3. Enter the staff member's name, globally unique staff ID (4–24 letters/numbers/underscore/hyphen), department and an initial 8–12 digit PIN.
+4. Give the staff ID and PIN privately to that person. The PIN is stored by Supabase Auth as a password hash; it is not stored as plain text in the application database.
+5. The staff member opens the same `auth.html` page, selects **Department staff**, and signs in with their own staff ID and PIN.
+6. If a PIN is forgotten, the administrator can use **Reset PIN** in the staff directory.
+
+Each staff account receives a separate Supabase Auth user/session behind the staff-ID login. The internal email alias is generated by the server and is not shown to staff. Staff IDs are globally unique because the login form does not ask users to choose an institution.
+
+## Department permissions
+- **Administrator:** full institutional visibility and control; can create staff IDs and reset PINs.
+- **Electricity & energy:** can read energy records, insert energy records and update only records they personally entered.
+- **Fuel:** can read fuel records, insert fuel records and update only records they personally entered.
+- **Transport:** can read transport records, insert transport records and update only records they personally entered.
+- **Waste:** can read waste records, insert waste records and update only records they personally entered.
+- **Procurement:** can read procurement records, insert procurement records and update only records they personally entered.
+
+Department restrictions are enforced by PostgreSQL Row Level Security (RLS), not merely by the page interface. The administrator can see all department records. A staff member cannot access another department's activity records through direct database/API requests.
 
 ## Emission factors and quality
-The CEA India grid factor seeded in the institutional schema is tagged with its source metadata for FY 2025–26. Other starter factors (diesel, petrol, LPG, landfill waste and paper) are provisional screening assumptions, not verified institution-specific lifecycle factors. Validate and document factors, reporting boundaries, gases, GWP basis, organisational consolidation approach, uncertainty and source evidence before formal disclosure.
+The CEA India grid factor seeded in the institutional schema is tagged with source metadata for FY 2025–26. Other starter factors (diesel, petrol, LPG, landfill waste and paper) are provisional screening assumptions, not verified institution-specific lifecycle factors. Validate and document factors, reporting boundaries, gases, GWP basis, organisational consolidation approach, uncertainty and source evidence before formal disclosure.
 
 ## Current capabilities and roadmap
-Implemented: public estimator; Supabase authentication; institution registration; facilities register; department role assignment for existing accounts; daily/monthly activity entry; factor snapshot at record time; scope-based dashboard; CSV activity export; responsive layout; persistent day/night theme toggle.
+Implemented in source: public estimator; Supabase administrator authentication; institution registration; facilities register; individual staff-ID/PIN login via Edge Functions; department role assignment; strict department RLS; daily/monthly activity entry; factor snapshot at record time; scope-based dashboard; CSV activity export; responsive layout; persistent day/night theme toggle.
 
-Planned before a production-grade deployment: secure file uploads and evidence review, invitation emails, MFA/SSO, audit-event history, factor approval/version workflow, sub-meter hierarchy, automated bill extraction with human verification, anomaly alerts, targets and baselines, multi-campus consolidation, data-quality scoring, and export formats aligned to the institution's selected reporting framework.
+Production hardening still recommended: invitation/first-login PIN change, MFA for administrators, formal audit-event history, factor approval/version workflow, evidence file uploads, sub-meter hierarchy, bill extraction with human verification, anomaly alerts, targets/baselines, multi-campus consolidation and data-quality scoring.
 
-CarboTrack is a project prototype, not an audited or certified GHG accounting system. It must not be represented as a verified inventory until data controls and factor validation are complete.
+CarboTrack is a project prototype, not an audited or certified GHG accounting system. Do not represent it as a verified inventory until data controls and factor validation are complete.
