@@ -3,7 +3,7 @@
 CarboTrack is a responsive institutional greenhouse-gas inventory platform for colleges, universities and campuses. The public estimator is an educational, anonymous experience; it is separate from the official institutional inventory.
 
 ## Deploy the website
-Vercel project type: Other / static site. Framework preset: Other. Build command: leave blank. Output directory: `. ` (repository root; use `.` in Vercel). The public Supabase URL and publishable key are configured in `js/config.js`. Never expose a Supabase secret or service-role key in browser code.
+Vercel project type: Other / static site. Framework preset: Other. Build command: leave blank. Output directory: `.` (repository root). The public Supabase URL and publishable key are configured in `js/config.js`. Never expose a Supabase secret or service-role key in browser code.
 
 ## Supabase database setup
 Run these SQL files in the Supabase SQL Editor in this exact order:
