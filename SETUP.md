@@ -1,29 +1,10 @@
-# CarboTrack — complete project setup
+# CarboTrack institutional emissions tracker
+CarboTrack is a campus greenhouse-gas inventory tool, not a personal carbon-footprint calculator.
 
-## Run locally
-Open the project in VS Code and use Live Server on `index.html`. The static calculator, local profile and challenge tracker work without an account.
+Workflow: create institution workspace; register campus facilities; record electricity, fuel, waste and procurement activity; apply emission factors with provenance; review monthly and scope totals; export activity register.
 
-## Pages
-- `index.html` — landing page
-- `calculator.html` / `results.html` — six-category footprint estimate and chart report
-- `dashboard.html` / `profile.html` — personal overview and local profile
-- `challenge.html` / `certificate.html` — seven-day challenge and printable certificate
-- `leaderboard.html` — opt-in campus leaderboard landing state
-- `auth.html` — Supabase sign-up/sign-in interface
-- `about.html`, `methodology.html`, `privacy.html` — project, methodology and privacy disclosures
+Deploy as static HTML/CSS/JavaScript on Vercel (Framework Other, no build command, output directory root). Supabase public URL and publishable key are in js/config.js. Never place a service-role or secret key in browser code.
 
-## Enable Supabase
-1. Create a Supabase project.
-2. Open Project Settings → API and copy the Project URL and anon/public key.
-3. Put both values in `js/config.js`. Never use a service_role key in browser code.
-4. Run `supabase/schema.sql` in the Supabase SQL Editor.
-5. In Supabase Auth, configure email verification and allowed redirect URLs for your deployed site.
-6. Test sign-up, email confirmation and sign-in before enabling public accounts.
+Run supabase/institutional-schema.sql in Supabase SQL Editor. This adds institutional tables and leaves the previous prototype tables intact. Sign in through auth.html, then create an institution workspace. The first creator becomes admin. The current UI includes workspace creation, activity entry, dashboard and CSV reporting; facility-management and invitations UI remain to be added.
 
-The included schema applies row-level security so users can access their own profiles, results and challenge progress. The leaderboard view is limited to users who opt in. Review and test policies before real institutional use.
-
-## Emission-factor warning
-The starter calculator currently uses simplified illustrative factors. Replace them with documented, India-relevant factors before using the result for academic research, institutional reporting or public ranking. Store factor source, year, geography, unit and uncertainty with every factor set.
-
-## GitHub Pages
-Repository Settings → Pages → Deploy from a branch → `main` → `/ (root)`. Remove the custom domain while testing the default GitHub Pages URL. Configure DNS and custom domain only after the default URL works.
+The CEA India FY 2025–26 grid factor is seeded as an official-source factor. Other seeded factors are provisional screening assumptions and must be validated/replaced before formal reporting. Evidence filenames are references only; file upload is not yet enabled. The system is not audited or certified.
