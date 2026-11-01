@@ -103,7 +103,7 @@ $$;
 create or replace function public.carbotrack_factor_matches_department(p_factor_id uuid, p_department text)
 returns boolean
 language sql stable security definer set search_path = public
-as $
+as $function$
   select exists (
     select 1 from public.emission_factors f
     where f.id = p_factor_id and f.active = true
@@ -115,7 +115,7 @@ as $
         or (p_department = 'procurement' and f.category = 'Purchased goods')
       )
   );
-$;
+$function$;
 
 -- Replace broad member-wide read access with department-scoped access.
 drop policy if exists activity_read_members on public.activity_records;
@@ -130,6 +130,7 @@ create policy activity_insert_department
 on public.activity_records for insert to authenticated
 with check (
   public.carbotrack_can_submit(organization_id, department)
+  and public.carbotrack_factor_matches_department(factor_id, department)
   and entered_by = auth.uid()
 );
 
@@ -141,6 +142,7 @@ using (
   public.carbotrack_is_admin(organization_id)
   or (
     public.carbotrack_can_submit(organization_id, department)
+    and public.carbotrack_factor_matches_department(factor_id, department)
     and entered_by = auth.uid()
   )
 )
@@ -148,6 +150,7 @@ with check (
   public.carbotrack_is_admin(organization_id)
   or (
     public.carbotrack_can_submit(organization_id, department)
+    and public.carbotrack_factor_matches_department(factor_id, department)
     and entered_by = auth.uid()
   )
 );
