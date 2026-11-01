@@ -40,6 +40,9 @@ create table if not exists public.staff_accounts (
 );
 
 create index if not exists staff_accounts_org_idx on public.staff_accounts(organization_id);
+-- Staff IDs are globally unique because the login screen asks for ID without an institution selector.
+create unique index if not exists staff_accounts_staff_code_global_ci_idx
+  on public.staff_accounts(lower(staff_code));
 create unique index if not exists staff_accounts_code_ci_idx
   on public.staff_accounts(organization_id, lower(staff_code));
 
