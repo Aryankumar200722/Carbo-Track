@@ -51,7 +51,7 @@ create policy "Results delete by owner" on public.carbon_results for delete usin
 drop policy if exists "Challenge owner access" on public.challenge_progress;
 create policy "Challenge owner access" on public.challenge_progress for all using(auth.uid()=user_id) with check(auth.uid()=user_id);
 -- Public leaderboard view exposes only opt-in display names and aggregate latest totals.
-create or replace view public.public_leaderboard with (security_invoker=true) as
+create or replace view public.public_leaderboard as
 select p.display_name,p.institution,r.total_kg,r.created_at
 from public.profiles p
 join lateral (select total_kg,created_at from public.carbon_results cr where cr.user_id=p.id order by created_at desc limit 1) r on true
