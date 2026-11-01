@@ -1,32 +1,29 @@
-# CarboTrack setup
-
-## Current implementation
-This repository is a fresh, independently authored implementation using HTML5, CSS3, vanilla JavaScript, Tailwind CDN utilities and Chart.js. The calculator, result report and seven-day challenge run locally using browser storage. No framework build step is required.
+# CarboTrack — complete project setup
 
 ## Run locally
-1. Clone this repository.
-2. Open the folder in VS Code.
-3. Start a local static server (VS Code Live Server is fine).
-4. Open index.html.
+Open the project in VS Code and use Live Server on `index.html`. The static calculator, local profile and challenge tracker work without an account.
 
-## Supabase integration (next phase)
-The current UI intentionally does not pretend that cloud authentication, verified campus leaderboard data or multi-device sync are active. To enable these features:
+## Pages
+- `index.html` — landing page
+- `calculator.html` / `results.html` — six-category footprint estimate and chart report
+- `dashboard.html` / `profile.html` — personal overview and local profile
+- `challenge.html` / `certificate.html` — seven-day challenge and printable certificate
+- `leaderboard.html` — opt-in campus leaderboard landing state
+- `auth.html` — Supabase sign-up/sign-in interface
+- `about.html`, `methodology.html`, `privacy.html` — project, methodology and privacy disclosures
+
+## Enable Supabase
 1. Create a Supabase project.
-2. Add a config file containing the project URL and anon key (never commit service-role keys).
-3. Add Supabase Auth with email verification.
-4. Apply the SQL schema in supabase/schema.sql.
-5. Implement authenticated result submission and RLS-protected reads.
-6. Add profile, challenge and leaderboard queries.
+2. Open Project Settings → API and copy the Project URL and anon/public key.
+3. Put both values in `js/config.js`. Never use a service_role key in browser code.
+4. Run `supabase/schema.sql` in the Supabase SQL Editor.
+5. In Supabase Auth, configure email verification and allowed redirect URLs for your deployed site.
+6. Test sign-up, email confirmation and sign-in before enabling public accounts.
 
-## Deployment
-Deploy the repository root as a static site using GitHub Pages, Netlify or Vercel. No Node build command is required. Ensure the root directory is selected and index.html is the entry point.
+The included schema applies row-level security so users can access their own profiles, results and challenge progress. The leaderboard view is limited to users who opt in. Review and test policies before real institutional use.
 
-## Before academic or institutional use
-Replace the illustrative factors in js/app.js with documented India-relevant emission factors. Record source, geography, year, unit and uncertainty for each factor. Validate category boundaries and avoid mixing household and personal scopes. Treat the current result as an educational estimate, not an audited inventory.
+## Emission-factor warning
+The starter calculator currently uses simplified illustrative factors. Replace them with documented, India-relevant factors before using the result for academic research, institutional reporting or public ranking. Store factor source, year, geography, unit and uncertainty with every factor set.
 
-## Roadmap
-- Supabase authentication, profile and saved calculations
-- Campus-level verified leaderboard with privacy controls
-- Challenge streaks and completion certificates
-- Factor library with sources, versions and uncertainty
-- Accessibility audit, automated tests and offline/PWA support
+## GitHub Pages
+Repository Settings → Pages → Deploy from a branch → `main` → `/ (root)`. Remove the custom domain while testing the default GitHub Pages URL. Configure DNS and custom domain only after the default URL works.
