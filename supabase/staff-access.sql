@@ -203,6 +203,14 @@ begin
 end;
 $$;
 
+revoke all on function public.carbotrack_can_submit(uuid, text) from public, anon;
+revoke all on function public.carbotrack_can_view_record(uuid, text) from public, anon;
+revoke all on function public.carbotrack_factor_matches_department(uuid, text) from public, anon;
+grant execute on function public.carbotrack_can_submit(uuid, text) to authenticated;
+grant execute on function public.carbotrack_can_view_record(uuid, text) to authenticated;
+grant execute on function public.carbotrack_factor_matches_department(uuid, text) to authenticated;
+
+revoke all on function public.carbotrack_list_members() from public, anon;
 grant execute on function public.carbotrack_list_members() to authenticated;
 
 -- No public/anonymous access to staff account metadata.
