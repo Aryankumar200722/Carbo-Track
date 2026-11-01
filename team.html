@@ -60,7 +60,7 @@
    const btn=e.target.closest('[data-reset]');if(!btn)return;
    const newPin=prompt('Enter a new 8–12 digit PIN for '+btn.dataset.reset+':');
    if(!newPin)return;
-   if(!/^\\d{8,12}$/.test(newPin)){alert('PIN must contain 8–12 digits.');return}
+   if(!/^\d{8,12}$/.test(newPin)){alert('PIN must contain 8–12 digits.');return}
    btn.disabled=true;
    const {data,error}=await st.sb.functions.invoke('staff-admin',{body:{action:'reset_pin',organizationId:st.org.id,staffCode:btn.dataset.reset,pin:newPin}});
    alert(error||data?.error?data?.error||error.message:'PIN reset successfully. Share it privately with the staff member.');
