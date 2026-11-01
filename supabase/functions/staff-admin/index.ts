@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
     if (memberError || membership?.role !== "admin") return json({ error: "Only the institution administrator can manage staff accounts." }, 403);
 
     if (action === "reset_pin") {
-      if (!/^[A-Z0-9_-]{4,24}$/.test(staffCode) || !/^\\d{8,12}$/.test(pin)) {
+      if (!/^[A-Z0-9_-]{4,24}$/.test(staffCode) || !/^\d{8,12}$/.test(pin)) {
         return json({ error: "Enter a valid staff ID and an 8–12 digit PIN." }, 400);
       }
       const { data: account, error: lookupError } = await admin.from("staff_accounts")
