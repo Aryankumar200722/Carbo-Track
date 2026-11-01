@@ -1,10 +1,10 @@
 # CarboTrack institutional emissions tracker
-CarboTrack is a campus greenhouse-gas inventory tool, not a personal carbon-footprint calculator.
+CarboTrack is an institutional greenhouse-gas inventory tool for colleges and universities, not a personal carbon-footprint calculator.
 
-Workflow: create institution workspace; register campus facilities; record electricity, fuel, waste and procurement activity; apply emission factors with provenance; review monthly and scope totals; export activity register.
+Workflow: create an institution workspace; register buildings and facilities; record electricity, fuel, waste and procurement activity; apply emission factors with provenance; review monthly and Scope 1/2/3 totals; export the activity register.
 
-Deploy as static HTML/CSS/JavaScript on Vercel (Framework Other, no build command, output directory root). Supabase public URL and publishable key are in js/config.js. Never place a service-role or secret key in browser code.
+Static HTML/CSS/JavaScript deployment: Vercel Framework Other, no build command, root output. Supabase public URL and publishable key are in js/config.js. Never put a service-role or secret key in browser code.
 
-Run supabase/institutional-schema.sql in Supabase SQL Editor. This adds institutional tables and leaves the previous prototype tables intact. Sign in through auth.html, then create an institution workspace. The first creator becomes admin. The current UI includes workspace creation, activity entry, dashboard and CSV reporting; facility-management and invitations UI remain to be added.
+Run supabase/institutional-schema.sql in the Supabase SQL Editor. It adds institutional tables alongside the earlier prototype tables. Sign in through auth.html, create an institution workspace, register facilities in facilities.html, then enter data through data-entry.html. The first workspace creator becomes admin.
 
-The CEA India FY 2025–26 grid factor is seeded as an official-source factor. Other seeded factors are provisional screening assumptions and must be validated/replaced before formal reporting. Evidence filenames are references only; file upload is not yet enabled. The system is not audited or certified.
+The CEA India FY 2025–26 grid factor is seeded with source metadata. Diesel, petrol, LPG, landfill waste and paper factors are provisional screening assumptions and must be validated/replaced before formal reporting. Evidence filenames are references only; file upload is not yet enabled. This prototype is not audited or certified.
