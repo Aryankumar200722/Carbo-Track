@@ -54,6 +54,13 @@ using (public.carbotrack_is_admin(organization_id));
 revoke all on public.staff_accounts from anon, authenticated;
 grant select on public.staff_accounts to authenticated;
 
+-- Members can see only their own membership row; administrators can manage the roster.
+drop policy if exists member_read_roster on public.organization_members;
+drop policy if exists member_read_self_or_admin on public.organization_members;
+create policy member_read_self_or_admin
+on public.organization_members for select to authenticated
+using (user_id = auth.uid() or public.carbotrack_is_admin(organization_id));
+
 -- Department-role mapping is enforced in PostgreSQL, not only in the UI.
 create or replace function public.carbotrack_can_submit(org_id uuid, dept text)
 returns boolean
