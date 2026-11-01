@@ -1,3 +1,71 @@
-<!doctype html><html lang="en" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Institution team — CarboTrack</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="css/style.css"></head><body><header class="topbar"><a class="brand" href="index.html"><span class="brand-symbol">C</span><span>carbo<span class="brand-accent">track</span></span></a><nav class="main-nav"><a href="dashboard.html">Overview</a><a href="data-entry.html">Activity entry</a><a href="facilities.html">Facilities</a><a class="active" href="team.html">Team</a><a href="reports.html">Reports</a></nav></header><main class="page-wrap"><div class="eyebrow">ACCESS CONTROL / TEAM</div><h1 class="page-title">The right people.<br><span style="color:var(--accent)">The right permissions.</span></h1><p class="page-intro">Add staff who already have a CarboTrack account, then assign their department. Staff can only submit records for their assigned operational area; administrators retain full institution control.</p><section class="panel"><h2>Add an authorised staff member</h2><p>First ask the staff member to register with their email. Then add that same email here.</p><form id="member-form"><div class="form-grid"><div class="field"><label for="member-email">Registered email address</label><input id="member-email" type="email" required placeholder="staff@gmail.com"></div><div class="field"><label for="role">Access role</label><select id="role"><option value="energy_manager">Electricity / energy manager</option><option value="fuel_manager">Generator / fuel manager</option><option value="transport_manager">Transport / fleet manager</option><option value="waste_manager">Waste manager</option><option value="procurement_manager">Procurement manager</option><option value="data_manager">Institution data manager</option><option value="viewer">Read-only reviewer</option></select></div></div><button class="btn btn-primary" style="margin-top:18px" type="submit">Assign access ↗</button><p id="form-message" class="auth-msg"></p></form></section><section class="panel"><h2>Institution members</h2><div class="table-wrap"><table><thead><tr><th>Email</th><th>Role</th><th>Department</th><th>Joined</th></tr></thead><tbody id="members"><tr><td colspan="4">Loading members…</td></tr></tbody></table></div></section><div class="notice">This initial team workflow assigns accounts that have already registered. It does not send email invitations. Role changes should be made by an institution administrator only.</div></main><script src="js/config.js"></script><script src="js/institution.js"></script><script src="js/theme.js"></script><script>
-(async()=>{const st=await CT.requireOrganization();if(!st)return;const form=document.getElementById('member-form');if(st.role!=='admin'){form.classList.add('hidden');document.querySelector('.notice').textContent='Only the institution administrator can add or change staff access.'}async function load(){const {data,error}=await st.sb.rpc('carbotrack_list_members');if(error){CT.message(error.message);return}document.getElementById('members').innerHTML=data.map(m=>'<tr><td>'+m.email+'</td><td>'+m.role.replaceAll('_',' ')+'</td><td>'+(m.department||'All departments')+'</td><td>'+new Date(m.joined_at).toLocaleDateString()+'</td></tr>').join('')||'<tr><td colspan="4">No members found.</td></tr>'}await load();form.addEventListener('submit',async e=>{e.preventDefault();const role=document.getElementById('role').value,department=({energy_manager:'energy',fuel_manager:'fuel',transport_manager:'transport',waste_manager:'waste',procurement_manager:'procurement'})[role]||null;const {error}=await st.sb.rpc('carbotrack_add_member',{p_email:document.getElementById('member-email').value.trim(),p_role:role,p_department:department});document.getElementById('form-message').textContent=error?error.message:'Staff access assigned.';document.getElementById('form-message').className='auth-msg '+(error?'error':'ok');if(!error){form.reset();await load()}})})();
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Staff access — CarboTrack</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="css/style.css"></head>
+<body>
+<header class="topbar"><a class="brand" href="index.html"><span class="brand-symbol">C</span><span>carbo<span class="brand-accent">track</span></span></a><nav class="main-nav"><a href="dashboard.html">Overview</a><a href="data-entry.html">Activity entry</a><a href="facilities.html">Facilities</a><a class="active" href="team.html">Staff access</a><a href="reports.html">Reports</a></nav><div class="nav-actions"><button class="btn btn-secondary btn-sm" id="signout">Sign out</button></div></header>
+<main class="page-wrap">
+<div class="eyebrow">ADMINISTRATION / ACCESS CONTROL</div><h1 class="page-title">One institution.<br><span style="color:var(--accent)">Individual staff access.</span></h1>
+<p class="page-intro">Create a private staff ID and initial PIN for each department member. Staff sign in through the same portal, but every person receives an individual session and department-specific database permissions.</p>
+<div id="admin-only" class="hidden">
+<section class="panel">
+<div class="eyebrow">CREATE DEPARTMENT LOGIN</div><h2>Register a staff member</h2><p>The staff ID must be unique across CarboTrack. Share the ID and initial PIN privately with that staff member.</p>
+<form id="staff-create-form">
+<div class="form-grid">
+<div class="field"><label for="staff-name">Staff member's full name</label><input id="staff-name" required maxlength="100" placeholder="e.g. Rahul Kumar"></div>
+<div class="field"><label for="staff-code">Unique staff ID</label><input id="staff-code" required minlength="4" maxlength="24" pattern="[A-Za-z0-9_-]+" placeholder="e.g. RAHUL123"></div>
+<div class="field"><label for="staff-department">Assigned department</label><select id="staff-department" required><option value="energy">Electricity &amp; energy</option><option value="fuel">Generator &amp; fuel</option><option value="transport">Transport &amp; fleet</option><option value="waste">Waste management</option><option value="procurement">Procurement &amp; materials</option></select></div>
+<div class="field"><label for="staff-pin">Initial PIN (8–12 digits)</label><input id="staff-pin" type="password" inputmode="numeric" required minlength="8" maxlength="12" pattern="[0-9]{8,12}" placeholder="Set a private initial PIN"></div>
+</div>
+<div class="form-actions"><span class="helper">PIN is stored as a Supabase Auth password hash, not as readable text.</span><button class="btn btn-primary" id="create-staff" type="submit">Create staff login ↗</button></div>
+<p id="form-message" class="auth-msg" role="status"></p>
+</form>
+</section>
+<section class="panel">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><div><h2>Institution staff directory</h2><p>Only the institution administrator can view this directory.</p></div><button class="btn btn-secondary btn-sm" id="refresh-roster" type="button">Refresh list</button></div>
+<div class="table-wrap"><table><thead><tr><th>Name</th><th>Private staff ID</th><th>Department</th><th>Access role</th><th>Joined</th><th>Status</th><th>Action</th></tr></thead><tbody id="members"><tr><td colspan="7">Loading staff…</td></tr></tbody></table></div>
+</section>
+<div class="notice">For security, staff IDs are shown only in the administrator's directory and to the relevant staff member. Never share the administrator's password. If a staff member forgets a PIN, use Reset PIN.</div>
+</div>
+<div id="not-admin" class="panel hidden"><h2>Administrator access required</h2><p class="muted">Only the institution's main administrator can create staff IDs, reset PINs or view the full staff directory.</p><a class="btn btn-primary" href="dashboard.html">Return to dashboard</a></div>
+</main>
+<script src="js/config.js"></script><script src="js/institution.js"></script><script src="js/theme.js"></script>
+<script>
+(async()=>{
+ const st=await CT.requireOrganization();if(!st)return;
+ document.getElementById('signout')?.addEventListener('click',async()=>{await st.sb.auth.signOut();location.href='auth.html'});
+ if(st.role!=='admin'){document.getElementById('not-admin').classList.remove('hidden');return}
+ document.getElementById('admin-only').classList.remove('hidden');
+ const form=document.getElementById('staff-create-form'),message=document.getElementById('form-message'),button=document.getElementById('create-staff');
+ async function load(){
+   const {data,error}=await st.sb.rpc('carbotrack_list_members');
+   if(error){document.getElementById('members').innerHTML='<tr><td colspan="7">Could not load staff: '+error.message+'</td></tr>';return}
+   document.getElementById('members').innerHTML=data.map(m=>{
+     const isStaff=!!m.staff_code;
+     return '<tr><td>'+escapeHtml(m.display_name)+'</td><td>'+(m.staff_code?'<strong>'+escapeHtml(m.staff_code)+'</strong>':'—')+'</td><td>'+escapeHtml(m.department||'All departments')+'</td><td>'+escapeHtml(m.role.replaceAll('_',' '))+'</td><td>'+new Date(m.joined_at).toLocaleDateString()+'</td><td>'+(m.is_active?'Active':'Disabled')+'</td><td>'+(isStaff?'<button class="btn btn-secondary btn-sm" type="button" data-reset="'+escapeHtml(m.staff_code)+'">Reset PIN</button>':'Administrator')+'</td></tr>'
+   }).join('')||'<tr><td colspan="7">No staff accounts yet.</td></tr>';
+ }
+ function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+ form.addEventListener('submit',async e=>{
+   e.preventDefault();button.disabled=true;message.textContent='Creating secure staff account…';message.className='auth-msg';
+   const payload={organizationId:st.org.id,displayName:document.getElementById('staff-name').value.trim(),staffCode:document.getElementById('staff-code').value.trim().toUpperCase(),department:document.getElementById('staff-department').value,pin:document.getElementById('staff-pin').value};
+   const {data,error}=await st.sb.functions.invoke('staff-admin',{body:payload});
+   if(error||data?.error){message.textContent=data?.error||error.message;message.className='auth-msg error'}
+   else{message.textContent='Staff login created. Give '+data.name+' the ID '+data.staffId+' and the PIN privately.';message.className='auth-msg ok';form.reset();await load()}
+   button.disabled=false;
+ });
+ document.getElementById('refresh-roster').addEventListener('click',load);
+ document.getElementById('members').addEventListener('click',async e=>{
+   const btn=e.target.closest('[data-reset]');if(!btn)return;
+   const newPin=prompt('Enter a new 8–12 digit PIN for '+btn.dataset.reset+':');
+   if(!newPin)return;
+   if(!/^\\d{8,12}$/.test(newPin)){alert('PIN must contain 8–12 digits.');return}
+   btn.disabled=true;
+   const {data,error}=await st.sb.functions.invoke('staff-admin',{body:{action:'reset_pin',organizationId:st.org.id,staffCode:btn.dataset.reset,pin:newPin}});
+   alert(error||data?.error?data?.error||error.message:'PIN reset successfully. Share it privately with the staff member.');
+   btn.disabled=false;
+ });
+ await load();
+})();
 </script></body></html>
