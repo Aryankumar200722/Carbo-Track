@@ -1,1 +1,1 @@
-/* Supabase public client configuration. Replace these placeholders with your own project values. Never put a service_role key in frontend code. */ window.CARBOTRACK_CONFIG={supabaseUrl:"",supabaseAnonKey:""};
+/* Supabase public client configuration. Never put a service_role or secret key in frontend code. */ window.CARBOTRACK_CONFIG={supabaseUrl:"https://gltqeuipmyzkwfefqifu.supabase.co",supabaseAnonKey:"sb_publishable_-TiUEt8bRpENlUpbM8nNng_X6Bg60eY"};
