@@ -1,0 +1,33 @@
+/* Facilities page: responsive mobile layout */
+main.shell{width:min(1080px,calc(100% - 32px))!important;margin:clamp(28px,5vw,58px) auto 88px!important;min-width:0}
+.facility-table-wrap{width:100%;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.facility-table{width:100%;min-width:600px;border-collapse:collapse}
+.mobile-menu-toggle{display:none;background:transparent;color:var(--text);border:1px solid var(--line);border-radius:10px;min-width:42px;height:40px;font-size:20px;cursor:pointer}
+@media(max-width:760px){
+ header.topbar{position:sticky;top:0;min-height:64px;padding:10px 14px!important;gap:10px}
+ .mobile-menu-toggle{display:grid;place-items:center;order:3;flex:0 0 42px}
+ header.topbar .main-nav{display:none;position:absolute;top:calc(100% + 1px);left:0;right:0;max-width:none;width:100%;padding:14px;background:rgba(7,17,13,.97);border-bottom:1px solid var(--line);box-shadow:0 18px 35px rgba(0,0,0,.25);flex-direction:column;align-items:stretch;gap:0;overflow:visible;z-index:60}
+ html[data-theme="light"] header.topbar .main-nav{background:rgba(248,251,245,.98)}
+ header.topbar .main-nav.is-open{display:flex}
+ header.topbar .main-nav a{display:block;padding:13px 12px;font-size:13px;border-radius:9px}
+ header.topbar .main-nav a.active{background:var(--surface-2)}
+ main.shell{width:calc(100% - 28px)!important;margin:28px auto 78px!important}
+ .page-title{font-size:clamp(32px,8vw,44px)!important}
+ .page-intro{font-size:13px!important}
+ main.shell>.panel{width:100%;min-width:0;padding:19px!important}
+ main.shell>.panel .grid{grid-template-columns:minmax(0,1fr)!important}
+ main.shell>.panel .btn{width:100%;min-height:48px}
+ .facility-table-wrap{overflow:visible}
+ .facility-table{min-width:0;width:100%}
+ .facility-table thead{display:none}
+ .facility-table,.facility-table tbody{display:block}
+ .facility-table tbody tr:not(.empty-row){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px;padding:12px 0;border-bottom:1px solid var(--line)}
+ .facility-table tbody td{display:flex;flex-direction:column;gap:3px;min-width:0;padding:7px 5px!important;border:0!important;font-size:12px!important;overflow-wrap:anywhere}
+ .facility-table tbody td:before{content:attr(data-label);color:var(--subtle);font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+ .facility-table tbody tr.empty-row{display:block}
+ .facility-table tbody tr.empty-row td{display:block;padding:15px 5px!important}
+}
+@media(max-width:380px){
+ main.shell>.panel{padding:16px!important}
+ .facility-table tbody tr:not(.empty-row){grid-template-columns:minmax(0,1fr)}
+}
