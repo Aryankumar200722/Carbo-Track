@@ -71,7 +71,7 @@ as $$
     where m.organization_id = org_id
       and m.user_id = auth.uid()
       and (
-        m.role in ('admin','data_manager')
+        m.role = 'admin'
         or (m.role = 'energy_manager' and dept = 'energy')
         or (m.role = 'fuel_manager' and dept = 'fuel')
         or (m.role = 'transport_manager' and dept = 'transport')
@@ -90,7 +90,7 @@ as $$
     where m.organization_id = org_id
       and m.user_id = auth.uid()
       and (
-        m.role in ('admin','data_manager','viewer')
+        m.role = 'admin'
         or (m.role = 'energy_manager' and dept = 'energy')
         or (m.role = 'fuel_manager' and dept = 'fuel')
         or (m.role = 'transport_manager' and dept = 'transport')
