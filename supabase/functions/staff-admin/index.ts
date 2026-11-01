@@ -27,9 +27,32 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json();
     const orgId = String(body.organizationId || "");
-    const displayName = String(body.displayName || "").trim();
+    const action = String(body.action || "create");
     const staffCode = String(body.staffCode || "").trim().toUpperCase();
     const pin = String(body.pin || "");
+
+    const { data: membership, error: memberError } = await admin
+      .from("organization_members")
+      .select("role")
+      .eq("organization_id", orgId)
+      .eq("user_id", userData.user.id)
+      .maybeSingle();
+    if (memberError || membership?.role !== "admin") return json({ error: "Only the institution administrator can manage staff accounts." }, 403);
+
+    if (action === "reset_pin") {
+      if (!/^[A-Z0-9_-]{4,24}$/.test(staffCode) || !/^\\d{8,12}$/.test(pin)) {
+        return json({ error: "Enter a valid staff ID and an 8–12 digit PIN." }, 400);
+      }
+      const { data: account, error: lookupError } = await admin.from("staff_accounts")
+        .select("auth_user_id").eq("organization_id", orgId).ilike("staff_code", staffCode).maybeSingle();
+      if (lookupError || !account) return json({ error: "Staff account not found." }, 404);
+      const { error: resetError } = await admin.auth.admin.updateUserById(account.auth_user_id, { password: pin });
+      if (resetError) return json({ error: resetError.message }, 400);
+      await admin.from("staff_accounts").update({ failed_attempts: 0, locked_until: null }).eq("auth_user_id", account.auth_user_id);
+      return json({ success: true, message: "Staff PIN reset successfully." });
+    }
+
+    const displayName = String(body.displayName || "").trim();
     const department = String(body.department || "");
 
     const roleByDepartment: Record<string, string> = {
@@ -43,14 +66,6 @@ Deno.serve(async (req) => {
         !/^\d{8,12}$/.test(pin) || !roleByDepartment[department]) {
       return json({ error: "Enter a name, a 4–24 character staff ID, an 8–12 digit PIN and a valid department." }, 400);
     }
-
-    const { data: membership, error: memberError } = await admin
-      .from("organization_members")
-      .select("role")
-      .eq("organization_id", orgId)
-      .eq("user_id", userData.user.id)
-      .maybeSingle();
-    if (memberError || membership?.role !== "admin") return json({ error: "Only the institution administrator can create staff accounts." }, 403);
 
     const { data: existing } = await admin.from("staff_accounts")
       .select("id").eq("organization_id", orgId).ilike("staff_code", staffCode).maybeSingle();
