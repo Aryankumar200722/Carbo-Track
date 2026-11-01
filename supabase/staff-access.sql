@@ -20,7 +20,7 @@ alter table public.organization_members
     'waste_manager','procurement_manager'
   ));
 
--- Staff IDs are unique within an institution. PINs are NOT stored here:
+-- Staff IDs are globally unique. PINs are NOT stored here:
 -- Supabase Auth stores the password hash.
 create table if not exists public.staff_accounts (
   id uuid primary key default gen_random_uuid(),
@@ -99,6 +99,23 @@ as $$
       )
   );
 $$;
+
+create or replace function public.carbotrack_factor_matches_department(p_factor_id uuid, p_department text)
+returns boolean
+language sql stable security definer set search_path = public
+as $
+  select exists (
+    select 1 from public.emission_factors f
+    where f.id = p_factor_id and f.active = true
+      and (
+        (p_department = 'energy' and f.category = 'Purchased electricity')
+        or (p_department = 'fuel' and f.category in ('Stationary/mobile fuel','Stationary fuel'))
+        or (p_department = 'transport' and f.category in ('Owned vehicle fuel','Stationary/mobile fuel'))
+        or (p_department = 'waste' and f.category = 'Waste')
+        or (p_department = 'procurement' and f.category = 'Purchased goods')
+      )
+  );
+$;
 
 -- Replace broad member-wide read access with department-scoped access.
 drop policy if exists activity_read_members on public.activity_records;
